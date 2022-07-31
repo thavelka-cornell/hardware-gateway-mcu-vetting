@@ -1,0 +1,2 @@
+# Ignore Zephyr RTOS build directory, it is created and or updated upon each successful build:
+build
