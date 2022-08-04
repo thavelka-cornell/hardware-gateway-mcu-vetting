@@ -7,11 +7,20 @@
 #include <zephyr/zephyr.h>
 #include <zephyr/drivers/gpio.h>
 
+#include "main.h"
+
+
+
 /* 1000 msec = 1 sec */
-#define SLEEP_TIME_MS   1000
+#define SLEEP_TIME_MS   750 // 1000
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
+
+
+#define MARK_CYCLE_LENGTH 6
+
+
 
 /*
  * A build error on this line means your board is unsupported.
@@ -21,22 +30,51 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 void main(void)
 {
-	int ret;
+    int ret;
+    uint32_t count_for_mark_messages = 0;
+    char lbuf[SIZE_OF_TEN_BYTES] = { 0 };
 
-	if (!device_is_ready(led.port)) {
-		return;
-	}
+    if (!device_is_ready(led.port)) {
+        return;
+    }
 
-	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
-	if (ret < 0) {
-		return;
-	}
+    ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+    if (ret < 0) {
+        return;
+    }
 
-	while (1) {
-		ret = gpio_pin_toggle_dt(&led);
-		if (ret < 0) {
-			return;
-		}
-		k_msleep(SLEEP_TIME_MS);
-	}
+
+    memset(lbuf, 0, SIZE_OF_TEN_BYTES);
+
+    while (1)
+    {
+        ret = gpio_pin_toggle_dt(&led);
+
+        if (ret < 0) {
+            return;
+        }
+
+        if ( count_for_mark_messages < MARK_CYCLE_LENGTH )
+        {
+            count_for_mark_messages++;
+        }
+        else
+        {
+            count_for_mark_messages = 1;
+            memset(lbuf, 0, SIZE_OF_TEN_BYTES);
+        }
+         
+        memset(lbuf, '.', count_for_mark_messages);
+
+        printk("- MARK - ( rpi work 2022-08-04 )");
+        printk(lbuf);
+        printk("\n\r");
+
+        k_msleep(SLEEP_TIME_MS);
+    }
 }
+
+
+
+
+
