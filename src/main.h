@@ -1,0 +1,8 @@
+#ifndef _MAIN_RPI_EXPLORE_WORK
+#define _MAIN_RPI_EXPLORE_WORK
+
+
+#define SIZE_OF_TEN_BYTES 10
+
+
+#endif // _MAIN_RPI_EXPLORE_WORK
