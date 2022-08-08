@@ -134,7 +134,7 @@ void main(void)
         memset(lbuf, '.', count_for_mark_messages);
 
         printk("- MARK - ( rpi work 2022-08-08 )");
-        printk(lbuf);
+        printk("%s", lbuf);
         printk("\n\r");
 // --- DEV END :: UART stuff ---
 

@@ -50,6 +50,22 @@
 #define LED0_FLAGS   0
 #endif
 
+
+#define LED1_NODE DT_ALIAS(led1)
+
+#if DT_NODE_HAS_STATUS(LED1_NODE, okay)
+#warning --- --- --- macro evaluating 'led1' dts alias returns true --- --- ---
+#define LED1_LABEL   DT_GPIO_LABEL(LED1_NODE, gpios)
+#define LED1_PIN     DT_GPIO_PIN(LED1_NODE, gpios)
+#define LED1_FLAGS   DT_GPIO_FLAGS(LED1_NODE, gpios)
+#else
+#warning --- --- --- macro evaluating 'led1' dts alias returns false --- --- ---
+#define LED1_LABEL   ""
+#define LED1_PIN     0
+#define LED1_FLAGS   0
+#endif
+
+
 #define SLEEP_TIME_MS (5000)
 
 
@@ -59,6 +75,8 @@
 static uint32_t sleep_period__thread_led__fsv;
 
 static const struct device *dev;
+
+static const struct device *dev_led1;
 
 
 
@@ -104,6 +122,8 @@ void thread_led__entry_point(void* arg1, void* arg2, void* arg3)
     uint32_t rstatus = ROUTINE_OK;
 
 
+// - Zephyr device initialization for LED zero:
+
     dev = device_get_binding(LED0_LABEL);
     if (dev == NULL) {
         return;
@@ -114,15 +134,38 @@ void thread_led__entry_point(void* arg1, void* arg2, void* arg3)
         return;
     }
 
+// - Zephyr device initialization for LED one:
+
+    dev_led1 = device_get_binding(LED1_LABEL);
+    if (dev_led1 == NULL) {
+        return;
+    }
+
+    ret = gpio_pin_configure(dev_led1, LED1_PIN, GPIO_OUTPUT_ACTIVE | LED1_FLAGS);
+    if (ret < 0) {
+        return;
+    }
+
+
+
+
     while (1)
     {
 
 #if 1
-        gpio_pin_set(dev, LED0_PIN, (int)led_is_on);
+        gpio_pin_set(dev, LED1_PIN, (int)led_is_on);
         led_is_on = !led_is_on;
-        k_msleep(SLEEP_TIME_MS);
+//        k_msleep(SLEEP_TIME_MS);
+        k_msleep(sleep_period__thread_led__fsv);
 
-        printk("- MARK - from LED thread 0808\n\r");
+        if ( led_is_on )
+        {
+            printk("- MARK - 0808 led on\n\r");
+        }
+        else
+        {
+            printk("- MARK - 0808 led off\n\r");
+        }
 #else
         switch(present_led_task)
         {

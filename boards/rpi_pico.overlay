@@ -44,3 +44,20 @@
 */
 
 
+/ {
+        leds {
+                compatible = "gpio-leds";
+                led1: led_1 {
+                        gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
+                        label = "LED1";
+                };
+        };
+
+        aliases {
+                led1 = &led1;
+        };
+};
+
+
+
+
