@@ -1,0 +1,14 @@
+#ifndef _RP2040_EXPLORATION_RETURN_VALUES
+#define _RP2040_EXPLORATION_RETURN_VALUES
+
+
+
+enum rp2040_exploration_return_values
+{
+    ROUTINE_OK = 0,
+    COUNT_OF_RETURN_VALUES
+};
+
+
+
+#endif // _RP2040_EXPLORATION_RETURN_VALUES

@@ -26,6 +26,7 @@ LOG_MODULE_REGISTER(main);
 // 2022-08-04 added for simple factoring during early UART tests:
 #include "main.h"
 #include "development-defines.h"
+#include "thread-led.h"
 
 
 
@@ -102,16 +103,21 @@ void main(void)
         return;
     }
 
+
     memset(lbuf, 0, SIZE_OF_TEN_BYTES);
 
+// NEED to capture return value from this routine call:
+    thread_led__initialize();
 
     while (1)
     {
+#ifdef DEV_0808__BLINK_FROM_MAIN_NOT_FROM_THREAD
         ret = gpio_pin_toggle_dt(&led);
 
         if (ret < 0) {
             return;
         }
+#endif
 
 
 // --- DEV BEGIN :: UART stuff ---
