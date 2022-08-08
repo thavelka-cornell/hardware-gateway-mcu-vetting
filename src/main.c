@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
+
+//----------------------------------------------------------------------
+// - SECTION - includes, NEED to review line by line which are needed - TMH
+//----------------------------------------------------------------------
+
 #include <errno.h>
 #include <string.h>
 #define LOG_LEVEL 4
@@ -19,18 +25,22 @@ LOG_MODULE_REGISTER(main);
 
 // 2022-08-04 added for simple factoring during early UART tests:
 #include "main.h"
+#include "development-defines.h"
 
 
 
-/* 1000 msec = 1 sec */
+//----------------------------------------------------------------------
+// - SECTION - defines
+//----------------------------------------------------------------------
+
+// 1000 msec = 1 sec
 #define SLEEP_TIME_MS   750 // 1000
 
-/* The devicetree node identifier for the "led0" alias. */
+// The devicetree node identifier for the "led0" alias.
 #define LED0_NODE DT_ALIAS(led0)
 
 
 #define MARK_CYCLE_LENGTH 6
-
 
 
 /*
@@ -42,6 +52,8 @@ LOG_MODULE_REGISTER(main);
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 #endif
 
+
+#ifdef DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
 
 // --- DEV BEGIN :: WS2812 test ---
 //
@@ -65,14 +77,19 @@ struct led_rgb pixels[STRIP_NUM_PIXELS];
 static const struct device *strip = DEVICE_DT_GET(STRIP_NODE);
 
 // --- DEV END :: WS2812 test ---
+#endif // DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
 
 
+
+//----------------------------------------------------------------------
+// - SECTION - routines
+//----------------------------------------------------------------------
 
 void main(void)
 {
     int ret;
 
-#if 0 // trying out WS1812 driver code on Sparkfun DEV-18288.
+#if 1 //
     uint32_t count_for_mark_messages = 0;
     char lbuf[SIZE_OF_TEN_BYTES] = { 0 };
 
@@ -86,9 +103,8 @@ void main(void)
     }
 
     memset(lbuf, 0, SIZE_OF_TEN_BYTES);
-#endif
 
-#if 0
+
     while (1)
     {
         ret = gpio_pin_toggle_dt(&led);
@@ -111,7 +127,7 @@ void main(void)
          
         memset(lbuf, '.', count_for_mark_messages);
 
-        printk("- MARK - ( rpi work 2022-08-04 )");
+        printk("- MARK - ( rpi work 2022-08-08 )");
         printk(lbuf);
         printk("\n\r");
 // --- DEV END :: UART stuff ---
@@ -120,7 +136,7 @@ void main(void)
     }
 #endif
 
-
+#ifdef DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
     size_t cursor = 0, color = 0;
     int rc;
 
@@ -152,6 +168,7 @@ void main(void)
 
         k_msleep(SLEEP_TIME_MS);
     }
+#endif // DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
 
 }
 
