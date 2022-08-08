@@ -1,0 +1,10 @@
+
+
+2022-08-05 FRI
+
+Finding:
+
+./zephyr/dts/common/mem.h:11:#define DT_SIZE_M(x) ((x) * 1024 * 1024)
+
+
+

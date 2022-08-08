@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2019, Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/led/led.h>
+
+
+/* https://developer.toradex.com/linux-bsp/how-to/device-tree/device-tree-customization/ */
+
+/ {
+        /delete-node/ led_0;
+};
+
+
+/ {
+	led_strip: ws2812 {
+		compatible = "worldsemi,ws2812-gpio";
+
+		chain-length = <1>; /* arbitrary . . . Ted reducing from 16 to 1 for DEV-18288 board. */
+		color-mapping = <LED_COLOR_ID_GREEN
+				 LED_COLOR_ID_RED
+				 LED_COLOR_ID_BLUE>;
+		/*
+		 * Arduino D11 / P0.25, which was chosen to match the pin
+		 * used in nrf52dk_nrf52832.overlay.
+		 * 2022-08-05 - P0.25 also used for data in line of WS2812 on Sparkfun DEV-18288 board:
+		 */
+
+		in-gpios = <&gpio0 25 0>;
+		label = "WS2812";
+	};
+
+	aliases {
+		led-strip = &led_strip;
+	};
+};
+
