@@ -28,6 +28,10 @@ LOG_MODULE_REGISTER(main);
 #include "development-defines.h"
 #include "thread-led.h"
 
+#include "pulse-v1-axis-sel.h"     // to provide AXIS_X and related
+#include "readings-set.h"
+#include "data-model-stage1.h"
+
 
 
 //----------------------------------------------------------------------
@@ -145,6 +149,7 @@ void main(void)
         if ( ( routine_main_iterations % 10 ) == 0 )
         {
             printk("...0809 vRMS code testing underway...\n\r");
+            on_event__readings_done__calculate_vrms(AXIS_X);
         }
 
 
@@ -188,7 +193,7 @@ void main(void)
     }
 #endif // DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
 
-    routine_main_interations++;
+    routine_main_iterations++;
 }
 
 
