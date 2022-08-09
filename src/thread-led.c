@@ -33,7 +33,7 @@
 
 #define THREAD_LED__PRIORITY (8)
 #define MODULE_ID__THREAD_LED "thread-led"
-#define SLEEP_TIME__THREAD_LED__MS (3000)
+#define SLEEP_TIME__THREAD_LED__MS (1500)
 
 
 #define LED0_NODE DT_ALIAS(led0)
@@ -158,14 +158,16 @@ void thread_led__entry_point(void* arg1, void* arg2, void* arg3)
 //        k_msleep(SLEEP_TIME_MS);
         k_msleep(sleep_period__thread_led__fsv);
 
+#if 0 // 2022-08-08 - second LED wired and working so no need for messages here - TMH
         if ( led_is_on )
         {
-            printk("- MARK - 0808 led on\n\r");
+            printk("- MARK - 0808 led off\n\r");  // per observation - TMH
         }
         else
         {
-            printk("- MARK - 0808 led off\n\r");
+            printk("- MARK - 0808 led on\n\r");
         }
+#endif
 #else
         switch(present_led_task)
         {

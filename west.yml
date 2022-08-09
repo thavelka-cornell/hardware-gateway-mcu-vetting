@@ -10,7 +10,11 @@ manifest:
 ##      revision: 30736644c61ff9a6a52ea052f453da58bbda8f33  # FATAL ERROR: command exited with status 128: rev-parse '30736644c61ff9a6a52ea052f453da58bbda8f33^{commit}'
 ##      revision: v3.1.0-rc3   # . . . booloader not linked problem appears present in this Zephyr tagged commit - TMH
 ##      Issue of not linked RPi Pico bootloader reported on 2022-06-15, June 15.
-      revision: v3.1.0-rc1
+
+##      revision: a150c7ee77687d543b903ea9008754da7415f4b5
+
+      revision: d82c10f1975c8a135cb9ce9a5430717edb715cad
+
       import: true
     # Drivers repository
     - name: zephyr-driver-work-v2

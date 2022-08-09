@@ -8,5 +8,17 @@
 //#define DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
 
 
+// Defines to support vRMS math testing without CLI, scoreboard module and
+// app conversions header file:
+
+//#define DEV_0808__SCOREBOARD_AVAILABLE
+
+#define VRMS_POWER_OF_TEN_SCALING_FOR_JSON (10000)
+
+#define FULL_READINGS_SET (2048)
+
+#define SIZE_OF_MESSAGE_SHORT (160)
+
+
 
 #endif // _RP2040_EXPLORE__DEVELOPMENT_DEFINES

@@ -6,3 +6,5 @@ project(blinky)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/thread-led.c)
+target_sources(app PRIVATE src/pulse-v1-syserr.c)
+target_sources(app PRIVATE src/data-model-stage1.c)
