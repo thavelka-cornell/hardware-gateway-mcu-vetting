@@ -64,15 +64,14 @@
 #include "pulse-v1-syserr.h"       // to provide Pulse V1 error accounting
 
 //#include "conversions.h"           // to provide JSON scaling value for VRMS results
-//#include "iis2dh-registers.h"
+#include "iis2dh-registers.h"
 //#include "pulse-pro-return-values.h"
-//#include "readings-set.h"
+#include "readings-set.h"
 //#include "scoreboard.h"
 //#include "thread-simple-cli.h"
 
 #include "app-return-values.h"     // to provide ROUTINE_OK and related
 #include "development-defines.h"   // to provide JSON scaling value for VRMS results
-#include "iis2dh-registers.h"
 
 
 
@@ -275,9 +274,11 @@ static float x_axis(unsigned idx)
 float acc_raw_to_float_mg(int16_t raw)
 {
 	float x = 0.0;
-        uint8_t iis2dh_full_scale_setting;
+        uint8_t iis2dh_full_scale_setting = ACC_FULL_SCALE_16G;
         uint32_t rstatus = ROUTINE_OK;
+#ifdef DEV_0808__SCOREBOARD_AVAILABLE
         rstatus = scoreboard__get_IIS2DH_CTRL_REG4_full_scale_config_bits(&iis2dh_full_scale_setting);
+#endif
 
 //	switch (GET_CR4_FS())
 	switch (iis2dh_full_scale_setting)
@@ -488,16 +489,16 @@ uint32_t on_event__readings_done__calculate_vrms(uint32_t event)
 
     float vrms = calc_acc_to_vrms(axis);
 
+#ifdef DEV_0808__SCOREBOARD_AVAILABLE
     rstatus = scoreboard__set_vrms_value_in_integer_json_ready_form((uint32_t)(vrms * VRMS_POWER_OF_TEN_SCALING_FOR_JSON));
 
     if ( rstatus == ROUTINE_OK )
     {
-#ifdef DEV_0808__SCOREBOARD_AVAILABLE
         rstatus = scoreboard__update_flag(DM__VRMS_CALCULATION_COMPLETE, SET_FLAG); 
-#else
-        printk("- DEV 0808 - calculating vRMS without scoreboard module.\n");
-#endif
     }
+#else
+    printk("- DEV 0808 - calculating vRMS without scoreboard module.\n");
+#endif
 
 #if PULSE_DEV__SHOW_LATEST_VRMS_VALUE == 1
     printk("- 1105 - calculated VRMS of %f\n", vrms);

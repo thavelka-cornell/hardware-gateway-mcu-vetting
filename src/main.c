@@ -90,8 +90,12 @@ void main(void)
 {
     int ret;
 
+    static uint32_t routine_main_iterations = 0;
+
 #if 1 //
     uint32_t count_for_mark_messages = 0;
+
+
     char lbuf[SIZE_OF_TEN_BYTES] = { 0 };
 
     if (!device_is_ready(led.port)) {
@@ -136,6 +140,14 @@ void main(void)
         printk("- MARK - ( rpi work 2022-08-08 )");
         printk("%s", lbuf);
         printk("\n\r");
+
+
+        if ( ( routine_main_iterations % 10 ) == 0 )
+        {
+            printk("...0809 vRMS code testing underway...\n\r");
+        }
+
+
 // --- DEV END :: UART stuff ---
 
         k_msleep(SLEEP_TIME_MS);
@@ -176,6 +188,7 @@ void main(void)
     }
 #endif // DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
 
+    routine_main_interations++;
 }
 
 
