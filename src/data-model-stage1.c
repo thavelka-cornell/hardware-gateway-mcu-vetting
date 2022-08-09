@@ -48,11 +48,12 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
-// --- DEV 0208 ---
 #include <stdio.h>                 // to provide snprintf() when enabled in prj.conf or other Kconfig
-//#include "thread-simple-cli.h"     // to provide printk_cli()
+#include <stdlib.h>
+#include <time.h>
+
+
 #include <kernel.h>                // to provide k_cycle_get_32()
-// --- DEV 0208 ---
 
 #include <arm_math.h>
 
@@ -171,6 +172,36 @@ static float f32_buf_2[N]; bool f32_buf_2_alloced = false;
 #if USE_F32_BUF3
 static float f32_buf_3[N]; bool f32_buf_3_alloced = false;
 #endif
+
+
+
+/*
+ *  @brief Populate vRMS calculation module readings array with
+ *     non-zero data for code testing and MCU fitness test purposes.
+ */ 
+
+#define FAUX_DATA_MODULO_VALUE (16)
+
+void populate_acc_buf(uint32_t axis_identifier)
+{
+
+    uint32_t i = 0;
+
+    time_t t;
+
+    srand((unsigned) time(&t));
+
+    while ( i < FULL_READINGS_SET )
+    {
+        i++;
+        acc_bufs[AXIS_X][i] = ( ( i % FAUX_DATA_MODULO_VALUE) & 0xFF );
+//        acc_bufs[AXIS_X][i] = ( ( rand() % 50 ) & 0xFF );
+//        acc_bufs[AXIS_X][i] = ( ( rand() % 2 ) & 0xFF );
+    }
+
+}
+
+
 
 // init buffer management
 static void init_f32_bufs(void)
@@ -325,13 +356,21 @@ static float calc_acc_to_vrms(unsigned axis)
     float vrms;
     int8_t *acc_buf = GET_AXIS_BUF(axis);
 
+    char lbuf[SIZE_OF_160_BYTES] = { 0 };
+
 
 // --- 1105 DEV BEGIN ---
 // printk("Begin 1105 DEV work, acc_buf detected size is %u bytes,\n", sizeof(acc_buf));  ...pointer to array has itself size int.
 #ifdef PULSE_DEV__VRMS_SHOW_RAW_DATA_BUFFER
-    printk("top of calc_acc_to_vrms() acc_buf holds:\n\n");
+    snprintf(lbuf, SIZE_OF_160_BYTES, "top of calc_acc_to_vrms() acc_buf holds %u bytes:\n\n", FULL_READINGS_SET);
+//    printk("top of calc_acc_to_vrms() acc_buf holds:\n\n");
+    printk("%s", lbuf);
     show_byte_buffer(acc_buf, FULL_READINGS_SET);
 #endif
+
+#ifdef RP2040_STUDY_SIMULATE_AXIS_X_READINGS
+    printk("RP2040 study simulating AXIS_X readings,\n\n");
+#else
     uint32_t rstatus = copy_x_axis_data_to(acc_buf);
 
     if ( rstatus != ROUTINE_OK ) { printk("Routine 'copy x axis data' returns error or warning status\n"); }
@@ -339,6 +378,7 @@ static float calc_acc_to_vrms(unsigned axis)
     printk("after copy of latest x-axis readings acc_buf holds:\n\n");
     show_byte_buffer(acc_buf, FULL_READINGS_SET);
 #endif
+#endif // RP2040_STUDY_SIMULATE_AXIS_X_READINGS
 
 //    printk("returning early . . .\n\n");
 //    return 0.0; 
@@ -452,7 +492,15 @@ static float calc_acc_to_vrms(unsigned axis)
             vrms += vpsd[n] * x_axis(n) * logf(x_axis(n+1) / x_axis(n));
     }
     vrms = 2.0 * sqrtf(vrms) * 25.4; //25.4 is a in/s to mm/s, mobile app is looking for mm/s
-    
+
+
+#ifdef RP2040_STUDY_SHOW_VRMS_SUMMARY
+//    snprintf(lbuf, SIZE_OF_160_BYTES, "RP2040 study, calc'd vRMS of %f\n\n", vrms);
+    snprintf(lbuf, SIZE_OF_160_BYTES, "RP2040 study, calc'd (vRMS * %u) of %u\n\n", 10000, (uint32_t)(vrms * 10000));
+    printk("%s", lbuf);
+#endif
+
+
     //compensate for the noise in the accelerometer at close to 0 in/s
     if(vrms < 0.2) // units of mm/s
     {
@@ -506,7 +554,13 @@ uint32_t on_event__readings_done__calculate_vrms(uint32_t event)
 // --- DEV 0208 ---
 //    snprintf(lbuf, sizeof(lbuf), "data model vRMS: %f\n\r", vrms); 
     cycle_count = k_cycle_get_32();
+
+#ifdef RP2040_STUDY_PRINTF_FLOAT_CRASHES_FIRMWARE
+    snprintf(lbuf, sizeof(lbuf), "kernel cycles at %08u, data model (vRMS * 10000): %u\n\r", cycle_count, (uint32_t)(vrms * 10000)); 
+#else
     snprintf(lbuf, sizeof(lbuf), "kernel cycles at %08u, data model vRMS: %f\n\r", cycle_count, vrms); 
+#endif
+
 #if 0
     printk_cli(lbuf);
 #else

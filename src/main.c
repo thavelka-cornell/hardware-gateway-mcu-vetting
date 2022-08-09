@@ -117,6 +117,10 @@ void main(void)
 // NEED to capture return value from this routine call:
     thread_led__initialize();
 
+// To support vRMS code tests:
+    populate_acc_buf(AXIS_X);
+
+
     while (1)
     {
 #ifdef DEV_0808__BLINK_FROM_MAIN_NOT_FROM_THREAD
@@ -146,12 +150,15 @@ void main(void)
         printk("\n\r");
 
 
-        if ( ( routine_main_iterations % 10 ) == 0 )
+        if ( ( routine_main_iterations % 5 ) == 0 )
         {
+            populate_acc_buf(AXIS_X);
+
             printk("...0809 vRMS code testing underway...\n\r");
             on_event__readings_done__calculate_vrms(AXIS_X);
         }
 
+        routine_main_iterations++;
 
 // --- DEV END :: UART stuff ---
 
@@ -193,7 +200,6 @@ void main(void)
     }
 #endif // DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
 
-    routine_main_iterations++;
 }
 
 
