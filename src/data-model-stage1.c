@@ -184,21 +184,49 @@ static float f32_buf_3[N]; bool f32_buf_3_alloced = false;
 
 void populate_acc_buf(uint32_t axis_identifier)
 {
-
+// local array index:
     uint32_t i = 0;
+
+// attempt to vary sets of random data, to obtain changing vRMS result with faux data:
+    static uint32_t cap_to_rand_call = 0;
 
     time_t t;
 
-    srand((unsigned) time(&t));
+// Need to keep track of a little more to seed random function with
+// across-calls-persistent seed:
+    static uint32_t routine_call_count = 0;
+
+
+//    srand((unsigned) time(&t));
+
+    if ( routine_call_count == 0 )
+    {
+        srand((unsigned) time(&t));
+        routine_call_count++;
+    }
+    else
+    {
+        cap_to_rand_call = ( rand() % 100 );
+        srand((unsigned) cap_to_rand_call);
+        cap_to_rand_call = ( rand() % 3 );
+    }
 
     while ( i < FULL_READINGS_SET )
     {
         i++;
-        acc_bufs[AXIS_X][i] = ( ( i % FAUX_DATA_MODULO_VALUE) & 0xFF );
-//        acc_bufs[AXIS_X][i] = ( ( rand() % 50 ) & 0xFF );
-//        acc_bufs[AXIS_X][i] = ( ( rand() % 2 ) & 0xFF );
+
+//        acc_bufs[AXIS_X][i] = ( ( i % FAUX_DATA_MODULO_VALUE) & 0xFF );
+//        acc_bufs[AXIS_X][i] = ( ( rand() % 50 ) & 0xFF );   // all vRMS results 2^31
+//        acc_bufs[AXIS_X][i] = ( ( rand() % 20 ) - 10 );     // all vRMS results 2^31
+//        acc_bufs[AXIS_X][i] = ( ( rand() % 3 ) - 1 );       // all vRMS results 2^31
+        acc_bufs[AXIS_X][i] = ( ( rand() % 3 ) );           // always calc' vRMS of 16334
+
+//        acc_bufs[AXIS_X][i] = ( ( rand() % cap_to_rand_call ) );
     }
 
+    char lbuf[SIZE_OF_160_BYTES] = { 0 };
+    snprintf(lbuf, SIZE_OF_160_BYTES, "cap to rand is %u\n", cap_to_rand_call);
+    printk("%s", lbuf);
 }
 
 
@@ -365,7 +393,7 @@ static float calc_acc_to_vrms(unsigned axis)
     snprintf(lbuf, SIZE_OF_160_BYTES, "top of calc_acc_to_vrms() acc_buf holds %u bytes:\n\n", FULL_READINGS_SET);
 //    printk("top of calc_acc_to_vrms() acc_buf holds:\n\n");
     printk("%s", lbuf);
-    show_byte_buffer(acc_buf, FULL_READINGS_SET);
+    show_byte_buffer(acc_buf, 256); // FULL_READINGS_SET);
 #endif
 
 #ifdef RP2040_STUDY_SIMULATE_AXIS_X_READINGS
