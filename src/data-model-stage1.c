@@ -523,8 +523,8 @@ static float calc_acc_to_vrms(unsigned axis)
 
 
 #ifdef RP2040_STUDY_SHOW_VRMS_SUMMARY
-//    snprintf(lbuf, SIZE_OF_160_BYTES, "RP2040 study, calc'd vRMS of %f\n\n", vrms);
-    snprintf(lbuf, SIZE_OF_160_BYTES, "RP2040 study, calc'd (vRMS * %u) of %u\n\n", 10000, (uint32_t)(vrms * 10000));
+    snprintf(lbuf, SIZE_OF_160_BYTES, "RP2040 study, calc'd vRMS of %f\n\n", vrms);
+//    snprintf(lbuf, SIZE_OF_160_BYTES, "RP2040 study, calc'd (vRMS * %u) of %u\n\n", 10000, (uint32_t)(vrms * 10000));
     printk("%s", lbuf);
 #endif
 
