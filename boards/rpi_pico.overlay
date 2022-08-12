@@ -14,35 +14,11 @@
 / {
         /delete-node/ led_0;
 };
-
-
-/ {
-	led_strip: ws2812 {
-		compatible = "worldsemi,ws2812-gpio";
-
-// Ted reducing from 16 to 1 for DEV-18288 board:
-		chain-length = <1>;
-		color-mapping = <LED_COLOR_ID_GREEN
-				 LED_COLOR_ID_RED
-				 LED_COLOR_ID_BLUE>;
-*/
-		/*
-		 * Arduino D11 / P0.25, which was chosen to match the pin
-		 * used in nrf52dk_nrf52832.overlay.
-		 * 2022-08-05 - P0.25 also used for data in line of WS2812 on Sparkfun DEV-18288 board:
-		 */
-/*
-
-		in-gpios = <&gpio0 25 0>;
-		label = "WS2812";
-	};
-
-	aliases {
-		led-strip = &led_strip;
-	};
-};
 */
 
+
+
+// Single GPIO overlaid by TMH during early RP2040 Zephyr work:
 
 / {
         leds {
@@ -60,4 +36,107 @@
 
 
 
+//----------------------------------------------------------------------
+// Note:  Although this firmware targets Sparkfun DEV-18288 kit, we
+//  look to RPi-Pico DTS for any SPI on-chip references it contains
+//  and we'll map such a SPI peripheral's data line to GPIOP0.25,
+//  per schematic at:
+//
+//  *  https://cdn.sparkfun.com/assets/4/a/6/d/6/SparkFun_Pro_Micro_RP2040_Schematic.pdf
+//
+// Nordic Semi provides an index of available device bindings:
+//
+//  *  https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.5.1/zephyr/reference/devicetree/bindings.html
+//
+// One company named Synopsys evidently provides the SPI device
+// binding which is implied in zephyr/boards/arm/rpi_pico/doc/index.rst:
+//
+//  *  https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.5.1/zephyr/reference/devicetree/bindings/snps%2Cdesignware-spi.html#snps-designware-spi
+//
+//
+// Note:  As we develop custom device tree files we may need to create
+//  more detailed device bindings files.  An example device bindings
+//  file from Zephyr RTOS Project release 3.1.0 SDK is: 
+//
+// # ~/projects-sandbox/workspace-for-rpi/zephyr/boards/arm/nrf9160dk_nrf9160/nrf9160dk_nrf9160.yaml
+//
+//
+//
+// REF https://docs.zephyrproject.org/3.0.0/samples/drivers/led_ws2812/README.html
+// REF https://github.com/zephyrproject-rtos/zephyr/blob/main/samples/drivers/led_ws2812/boards/nrf52dk_nrf52832.overlay
+//----------------------------------------------------------------------
 
+
+
+
+// Using as example dts from Zephyr 3.1.0 zephyr/dts/arm/rpi_pico/rp2040.dtsi
+// and file zephyr/dts/arm/nordic/nrf52840.dtsi
+// and rp2040-datasheet.pdf:
+
+#include <zephyr/dt-bindings/spi/spi.h>
+
+/ {
+        soc {
+                spi0: spi@0x4003c000 {
+/*
+                        compatible = "nordic,nrf-spim";
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+                        reg = <0x40003000 0x1000>;
+                        interrupts = <3 NRF_DEFAULT_IRQ_PRIORITY>;
+                        status = "disabled";
+                        label = "SPI_0";
+*/
+                        compatible = "snps,designware-spi";
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+                        reg = <0x4003c000 0x1000>;
+                        interrupts = <4 RPI_PICO_DEFAULT_IRQ_PRIORITY>;
+                        status = "disabled";
+                        label = "SPI_0";
+                };
+        };
+};
+
+
+
+/*
+ *  2022-08-11 - Attempt to add SPI on-chip-RP2040 peripheral to RPi Pico primary dts file: - TMH
+ */
+
+&spi0 {
+        compatible = "snps,designware-spi";
+        status = "okay";
+        cs-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>;
+        pinctrl-0 = <&spi0_default>;
+/*        pinctrl-1 = <&spi0_sleep>; */
+        pinctrl-names = "default", "sleep";
+};
+
+
+
+
+&spi0 { /* MOSI on P0.25 as this GPIO of the RP2040 based DEV-18288 kit connects to DIN of WS2812 led strip device */
+	compatible = "snps,designware-spi";
+	led_strip: ws2812@0 {
+		compatible = "worldsemi,ws2812-spi";
+
+		/* SPI */
+		reg = <0>; /* ignored, but necessary for SPI bindings */
+		spi-max-frequency = <2000000>; /* <SPI_FREQ>; */
+
+		/* WS2812 */
+		chain-length = <1>; /* arbitrary; change at will */
+		color-mapping = <LED_COLOR_ID_GREEN
+				 LED_COLOR_ID_RED
+				 LED_COLOR_ID_BLUE>;
+		spi-one-frame = <ONE_FRAME>;
+		spi-zero-frame = <ZERO_FRAME>;
+	};
+};
+
+/ {
+	aliases {
+		led-strip = &led_strip;
+	};
+};

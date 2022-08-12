@@ -162,8 +162,8 @@ void main(void)
 
 // --- DEV END :: UART stuff ---
 
-        k_msleep(SLEEP_TIME_MS);
-    }
+//        k_msleep(SLEEP_TIME_MS);
+//    }
 #endif
 
 #ifdef DEV_0805__WS2812_BRING_UP_WORK_ON_RP2040
